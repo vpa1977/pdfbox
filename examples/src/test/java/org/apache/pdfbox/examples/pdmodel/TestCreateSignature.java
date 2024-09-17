@@ -334,13 +334,13 @@ class TestCreateSignature
 
     /**
      * Test timestamp only signature (ETSI.RFC3161).
-     * 
+     *
      * @throws IOException
      * @throws CMSException
      * @throws OperatorCreationException
      * @throws GeneralSecurityException
      * @throws TSPException
-     * @throws CertificateVerificationException 
+     * @throws CertificateVerificationException
      */
     @Test
     void testCreateSignedTimeStamp()
@@ -452,7 +452,7 @@ class TestCreateSignature
     /**
      * Test when visually signing externally on an existing signature field on a file which has
      * been signed before.
-     * 
+     *
      * @throws IOException
      * @throws NoSuchAlgorithmException
      * @throws CertificateException
@@ -464,8 +464,8 @@ class TestCreateSignature
      * @throws CertificateVerificationException
      */
     @Test
-    void testPDFBox3978() throws IOException, NoSuchAlgorithmException, 
-                                        CertificateException, UnrecoverableKeyException, 
+    void testPDFBox3978() throws IOException, NoSuchAlgorithmException,
+                                        CertificateException, UnrecoverableKeyException,
                                         CMSException, OperatorCreationException, GeneralSecurityException,
                                         TSPException, CertificateVerificationException
     {
@@ -578,7 +578,7 @@ class TestCreateSignature
                 ++p;
             }
 
-            // PDFBOX-4261: check that object number stays the same 
+            // PDFBOX-4261: check that object number stays the same
             assertEquals(origPageKey, document.getDocumentCatalog().getCOSObject().getItem(COSName.PAGES).toString());
 
             List<PDSignature> signatureDictionaries = document.getSignatureDictionaries();
@@ -636,7 +636,7 @@ class TestCreateSignature
                     byte[] tsMessageImprintDigest = timeStampInfo.getMessageImprintDigest();
                     String hashAlgorithm = timeStampInfo.getMessageImprintAlgOID().getId();
                     byte[] sigMessageImprintDigest = MessageDigest.getInstance(hashAlgorithm).digest(signerInformation.getSignature());
-                    assertArrayEquals(sigMessageImprintDigest, tsMessageImprintDigest, "timestamp signature verification failed");                    
+                    assertArrayEquals(sigMessageImprintDigest, tsMessageImprintDigest, "timestamp signature verification failed");
 
                     Store<X509CertificateHolder> tsCertStore = timeStampToken.getCertificates();
 
@@ -666,13 +666,13 @@ class TestCreateSignature
     /**
      * PDFBOX-3811: make sure that calling saveIncrementalForExternalSigning() more than once
      * brings the same result.
-     * 
+     *
      * @throws IOException
-     * @throws NoSuchAlgorithmException 
+     * @throws NoSuchAlgorithmException
      */
     @Test
     void testPDFBox3811() throws IOException, NoSuchAlgorithmException
-    {        
+    {
         // create simple PDF
         PDDocument document = new PDDocument();
         PDPage page = new PDPage();
@@ -681,11 +681,11 @@ class TestCreateSignature
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         document.save(baos);
         document.close();
-        
+
         document = Loader.loadPDF(baos.toByteArray());
         // for stable digest
         document.setDocumentId(12345L);
-        
+
         PDSignature signature = new PDSignature();
         signature.setFilter(PDSignature.FILTER_ADOBE_PPKLITE);
         signature.setSubFilter(PDSignature.SUBFILTER_ADBE_PKCS7_DETACHED);
@@ -735,7 +735,7 @@ class TestCreateSignature
         try (PDDocument doc = Loader.loadPDF(new File(OUT_DIR, fileNameSigned)))
         {
             oldImage = new PDFRenderer(doc).renderImage(0);
-            
+
             FileOutputStream fileOutputStream = new FileOutputStream(new File(OUT_DIR, fileNameResaved1));
             PDField field = doc.getDocumentCatalog().getAcroForm().getField("SampleField");
             field.setValue("New Value 1");
@@ -839,7 +839,7 @@ class TestCreateSignature
 
     /**
      * Test getting CRLs when OCSP (adobe-ocsp.geotrust.com) is unavailable.
-     * This validates the certificates of the signature from the file 083698.pdf, which is 
+     * This validates the certificates of the signature from the file 083698.pdf, which is
      * 109TH CONGRESS 2D SESSION H. R. 5500, from MAY 25, 2006.
      *
      * @throws IOException
@@ -848,14 +848,13 @@ class TestCreateSignature
      * @throws TSPException
      * @throws OperatorCreationException
      * @throws CertificateVerificationException
-     * @throws NoSuchAlgorithmException 
+     * @throws NoSuchAlgorithmException
      */
-    @Test
     void testCRL() throws IOException, CMSException, CertificateException, TSPException,
             OperatorCreationException, CertificateVerificationException, NoSuchAlgorithmException
     {
         String hexSignature;
-        try (BufferedReader bfr = 
+        try (BufferedReader bfr =
             new BufferedReader(new InputStreamReader(new FileInputStream(IN_DIR + "hexsignature.txt"))))
         {
             hexSignature = bfr.readLine();
@@ -1029,12 +1028,12 @@ class TestCreateSignature
                     }
                 }
                 assertTrue(crlVerified, "issuer of CRL not found in Certs array");
-                
+
                 BEROctetString encodedSignature = new BEROctetString(crl.getSignature());
                 byte[] crlSignatureHash = MessageDigest.getInstance("SHA-1").digest(encodedSignature.getEncoded());
                 String hexCrlSignatureHash = Hex.getString(crlSignatureHash);
                 System.out.println("hexCrlSignatureHash: " + hexCrlSignatureHash);
-                
+
                 // Check that the issueing certificate is in the VRI array
                 COSDictionary crlSigDict = vriDict.getCOSDictionary(COSName.getPDFName(hexCrlSignatureHash));
                 COSArray certArray2 = crlSigDict.getCOSArray(COSName.getPDFName("Cert"));
@@ -1044,7 +1043,7 @@ class TestCreateSignature
                 {
                     certHolder2 = new X509CertificateHolder(IOUtils.toByteArray(is2));
                 }
-                
+
                 assertEquals(certHolder2, new X509CertificateHolder(crlIssuerCert.getEncoded()),
                         "CRL issuer certificate missing in VRI " + hexCrlSignatureHash);
             }
@@ -1070,7 +1069,7 @@ class TestCreateSignature
                 System.out.println("ocspSignatureHash: " + hexOcspSignatureHash);
                 long secondsOld = (System.currentTimeMillis() - basicResponse.getProducedAt().getTime()) / 1000;
                 assertTrue(secondsOld < 20, "OCSP answer is too old, is from " + secondsOld + " seconds ago");
-                
+
                 X509CertificateHolder ocspCertHolder = basicResponse.getCerts()[0];
                 ContentVerifierProvider verifier = new JcaContentVerifierProviderBuilder().setProvider(SecurityProvider.getProvider()).build(ocspCertHolder);
                 assertTrue(basicResponse.isSignatureValid(verifier));
